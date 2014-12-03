@@ -1,7 +1,9 @@
 module Webhose
   module Api
     class Response
-      def initialize
+      attr_accessor :posts
+      def initialize(posts,opts = {})
+        self.posts = posts
       end
       def next
       end
