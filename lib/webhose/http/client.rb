@@ -1,4 +1,6 @@
 require 'faraday'
+require 'addressable/uri'
+require "addressable/template"
 require 'webhose/errors'
 require 'webhose/http/response'
 require 'faraday_middleware'
@@ -16,7 +18,9 @@ module Webhose
 
         case method.to_s
           when "get"
-            path = "#{path}?#{params.to_query}"
+            uri = Addressable::URI.parse(path)
+            template = Addressable::Template.new("#{path}{?query*}")
+            path = template.expand({query: (uri.query_values || {}).merge(params)})
             params = {}
         end
 
@@ -32,7 +36,7 @@ module Webhose
 
       def build_connection
         conn = Faraday.new(default_endpoint) do |conn|
-          conn.response :json
+          conn.response :json, :content_type => /\bjson$/
           conn.adapter default_adapter
         end
       end

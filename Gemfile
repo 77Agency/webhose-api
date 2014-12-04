@@ -6,7 +6,7 @@ end
 
 group :test do
   gem "rspec"
-  gem "vcr"
+  gem "vcr", github: "vcr/vcr"
 end
 
 gemspec
