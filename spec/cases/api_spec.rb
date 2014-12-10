@@ -9,7 +9,7 @@ describe "Webhose::API" do
     end
   end
   it "parse correctly all the entries" do
-    VCR.use_cassette 'api/token' do
+    VCR.use_cassette 'api/token/1' do
       api = Webhose::API.new(ENV["TOKEN"])
       response = api.search("test")
       expect(response.posts.length).to eq(100)
@@ -23,5 +23,15 @@ describe "Webhose::API" do
       post.crawled = Time.parse("2014-12-06T01:11:30.000+02:00")
     end
   end
-
+  it "returns the next entries" do
+    VCR.use_cassette 'api/token/1' do
+      api = Webhose::API.new(ENV["TOKEN"])
+      response1 = api.search("test")
+      VCR.use_cassette 'api/token/2' do
+        response2 = response1.next
+        expect(response2.posts.length).to eq(100)
+        expect(response1.posts.first.url != response2.posts.first.url)
+      end
+    end
+  end
 end

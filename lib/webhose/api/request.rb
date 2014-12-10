@@ -27,12 +27,17 @@ module Webhose
 
       def parse_response(response)
         posts = response.body["posts"].map {|p| post_from_json(p)}
-        Webhose::Api::Response.new(posts)
+        opts = {}
+        opts[:next] = request_from_next(response.body["next"]) if response.body["next"]
+        Webhose::Api::Response.new(posts,opts)
       end
 
       def post_from_json(json)
         Webhose::Models::Post.new(json["url"],json["ord_in_thread"],json["author"],Time.parse(json["published"]),json["title"],json["text"],json["language"],json["crawled"],json["thread"])
+      end
 
+      def request_from_next(next_link)
+        self.class.new(Addressable::URI.parse(next_link).query_values)
       end
 
     end
